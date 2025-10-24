@@ -14,6 +14,7 @@ public class Dealership {
     private String phone;
 
     static List<Vehicle> inventory = readInventory();
+
     public static Scanner scan = new Scanner(System.in);
 
     public Dealership(String name, String address, String phone){
@@ -63,7 +64,15 @@ public class Dealership {
     }
 
     public static List<Vehicle> getVehiclesByMileage(int min, int max){
-        return null;
+
+        List<Vehicle> filteredVehicles = new ArrayList<>();
+
+        for(Vehicle v : inventory){
+            if(v.getOdometer()>=min && v.getOdometer()<=max){
+                filteredVehicles.add(v);
+            }
+        }
+        return printInventory(filteredVehicles);
     }
 
     public static List<Vehicle> getVehiclesByType(String vehicleType){

@@ -2,8 +2,7 @@ package com.pluralsight;
 
 import java.util.Scanner;
 
-import static com.pluralsight.Dealership.getAllVehicles;
-import static com.pluralsight.Dealership.getVehiclesByType;
+import static com.pluralsight.Dealership.*;
 import static com.pluralsight.DealershipFileManager.printInventory;
 
 public class Program {
@@ -21,6 +20,11 @@ public class Program {
 
         String type = "SUV";
         getVehiclesByType(type);
+
+        int min = 0;
+        int max = 100000;
+
+        getVehiclesByMileage(min,max);
 
     }
 }
