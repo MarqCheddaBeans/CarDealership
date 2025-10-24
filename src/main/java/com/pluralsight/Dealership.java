@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import static com.pluralsight.DealershipFileManager.printInventory;
-import static com.pluralsight.DealershipFileManager.readInventory;
+import static com.pluralsight.DealershipFileManager.*;
 
 public class Dealership {
 
@@ -156,7 +155,40 @@ public class Dealership {
          inventory.add(vehicle);
 
          //Call static method in DealershipFileManager class to write new vehicle to csv file(Inventory)
-        DealershipFileManager.writeToCsv(vehicle);
+        DealershipFileManager.addToCsv(vehicle);
     }
-    public static void removeVehicle(Vehicle vehicle){}
+    public static void removeVehicle(){
+
+        List<Vehicle> vehicleList = readInventory();
+
+        System.out.print("Enter VIN of vehicle to remove: ");
+        String vin = scan.nextLine();
+
+        Vehicle vehicleToPackUp = null;
+
+        for(Vehicle v : vehicleList){
+            if(v.getVin().equalsIgnoreCase(vin)){
+                vehicleToPackUp = v;
+                break;
+            }
+        }
+
+        if(vehicleToPackUp == null){
+            System.out.println("Vehicle with VIN " + vin + " not found.");
+            return;
+        }
+
+        System.out.println("\n Vehicle found: ");
+        System.out.printf("%-15s| %-5d| %-15s| %-15s| %-10s| %-8s| %-10d| $%-10.2f%n", vehicleToPackUp.getVin(),vehicleToPackUp.getYear(),vehicleToPackUp.getMake(),vehicleToPackUp.getModel(),vehicleToPackUp.getVehicleType(),vehicleToPackUp.getColor(),vehicleToPackUp.getOdometer(),vehicleToPackUp.getPrice());
+
+        System.out.println("\nAre you sure you want to remove this vehicle? (Y/N)");
+        String confirm = scan.nextLine().trim();
+
+        if(confirm.equalsIgnoreCase("Y")){
+            vehicleList.remove(vehicleToPackUp);
+            rewriteCsv(vehicleList);
+        }else{
+            System.out.println("Removal cancelled;");
+        }
+    }
 }

@@ -46,7 +46,7 @@ public class DealershipFileManager {
         return vehicle;
     }
 
-    public static void writeToCsv(Vehicle v){
+    public static void addToCsv(Vehicle v){
 
         try(BufferedWriter buffWrite = new BufferedWriter(new FileWriter(filePath,true))){
 
@@ -55,6 +55,23 @@ public class DealershipFileManager {
                 buffWrite.write(formatVehicle);
                 buffWrite.newLine();
             System.out.println("Vehicle added successfully");
+
+        }catch(IOException e){
+            System.out.println("No file found.");
+        }
+    }
+
+    public static void rewriteCsv(List<Vehicle> vehicleList){
+
+        try(BufferedWriter buffWrite = new BufferedWriter(new FileWriter(filePath))){
+            for(Vehicle v : vehicleList){
+
+                String formatVehicle = String.format("%-15s| %-5d| %-15s| %-15s| %-10s| %-8s| %-10s| %-10.2f",v.getVin(),v.getYear(),v.getMake(),v.getModel(),v.getVehicleType(), v.getColor(), v.getOdometer(), v.getPrice());
+
+                buffWrite.write(formatVehicle);
+                buffWrite.newLine();
+            }
+            System.out.println("Inventory updated successfully!");
 
         }catch(IOException e){
             System.out.println("No file found.");

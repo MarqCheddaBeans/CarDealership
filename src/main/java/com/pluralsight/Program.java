@@ -19,17 +19,7 @@ public class Program {
         System.out.println();
         System.out.println();
 
-        int minY = 2000;
-        int maxY = 2013;
-        getVehiclesByYear(minY, maxY);
-
-        System.out.println();
-        System.out.println();
-
-        String make = "";
-        String model = "Civic";
-        getVehiclesByMakeModel(make,model);
-
+        removeVehicle();
 
 
 
