@@ -4,6 +4,7 @@ import java.util.Scanner;
 
 import static com.pluralsight.Dealership.*;
 import static com.pluralsight.DealershipFileManager.printInventory;
+import static com.pluralsight.DealershipFileManager.readInventory;
 
 public class Program {
 
@@ -13,18 +14,31 @@ public class Program {
 
         Dealership dealer = new Dealership("BuyNowRegretLater","Dimension C-137", "1-877-FAST-AF");
 
-        getAllVehicles();
+        printInventory(readInventory());
 
         System.out.println();
         System.out.println();
 
-        String type = "SUV";
-        getVehiclesByType(type);
+        int minY = 2000;
+        int maxY = 2013;
+        getVehiclesByYear(minY, maxY);
 
-        int min = 0;
-        int max = 100000;
+        System.out.println();
+        System.out.println();
 
-        getVehiclesByMileage(min,max);
+        String make = "";
+        String model = "Civic";
+        getVehiclesByMakeModel(make,model);
+
+
+
+
+
+
+
+
+
+
 
     }
 }
