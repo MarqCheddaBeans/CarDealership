@@ -13,7 +13,7 @@ public class Dealership {
     private String address;
     private String phone;
 
-    static ArrayList<Vehicle> inventory = new ArrayList<>();
+    static List<Vehicle> inventory = readInventory();
     public static Scanner scan = new Scanner(System.in);
 
     public Dealership(String name, String address, String phone){
@@ -67,11 +67,19 @@ public class Dealership {
     }
 
     public static List<Vehicle> getVehiclesByType(String vehicleType){
-        return null;
+
+        List<Vehicle> filteredVehicles = new ArrayList<>();
+
+        for(Vehicle v : inventory){
+            if(v.getVehicleType().equalsIgnoreCase(vehicleType)){
+                filteredVehicles.add(v);
+            }
+        }
+        return printInventory(filteredVehicles);
     }
 
     public static void getAllVehicles(){
-        printInventory();
+        printInventory(readInventory());
     }
 
     public static void addVehicle(){

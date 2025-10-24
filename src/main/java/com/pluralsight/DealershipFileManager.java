@@ -61,10 +61,14 @@ public class DealershipFileManager {
         }
     }
 
-    public static void printInventory(){
+    public static List<Vehicle> printInventory(List<Vehicle> vehicleList){
 
-        List<Vehicle> vehicleList = readInventory();
-
+        //check if list exists or if it has no elements
+        if(vehicleList == null || vehicleList.isEmpty()){
+            //if true, displays error message and exits method
+            System.out.println("No vehicles found.");
+            return vehicleList;
+        }
         String header = String.format("%-25s| %-25s| %-25s","BuyNowRegretLater", "Dimension C-137" , "1-877-FAST-AF");
         System.out.println(header);
 
@@ -75,6 +79,7 @@ public class DealershipFileManager {
             System.out.println(formatVehicle);
         }
 
+        return vehicleList;
     }
 
 }
