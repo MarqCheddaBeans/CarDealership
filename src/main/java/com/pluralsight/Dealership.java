@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import static com.pluralsight.DealershipFileManager.printInventory;
+import static com.pluralsight.DealershipFileManager.readInventory;
+
 public class Dealership {
 
     private String name;
@@ -67,8 +70,8 @@ public class Dealership {
         return null;
     }
 
-    public static List<Vehicle> getAllVehicles(){
-        return null;
+    public static void getAllVehicles(){
+        printInventory();
     }
 
     public static void addVehicle(){
