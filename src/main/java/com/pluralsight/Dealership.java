@@ -11,15 +11,15 @@ public class Dealership {
     private String name;
     private String address;
     private String phone;
-
-    static List<Vehicle> inventory = readInventory();
+    private List<Vehicle> inventory;
 
     public static Scanner scan = new Scanner(System.in);
 
-    public Dealership(String name, String address, String phone){
+    public Dealership(String name, String address, String phone, List<Vehicle> inventory){
         this.name = name;
         this.address = address;
         this.phone = phone;
+        this.inventory = inventory;
     }
 
     public String getName() {
@@ -46,7 +46,11 @@ public class Dealership {
         this.phone = phone;
     }
 
-    public static List<Vehicle> getVehiclesByPrice(double min, double max){
+    public List<Vehicle> getInventory(){
+        return inventory;
+    }
+
+    public List<Vehicle> getVehiclesByPrice(double min, double max){
         List<Vehicle> filteredVehicles = new ArrayList<>();
 
         for(Vehicle v : inventory){
@@ -54,10 +58,10 @@ public class Dealership {
                 filteredVehicles.add(v);
             }
         }
-        return printInventory(filteredVehicles);
+        return filteredVehicles;
     }
 
-    public static List<Vehicle> getVehiclesByMakeModel(String make, String model){
+    public List<Vehicle> getVehiclesByMakeModel(String make, String model){
         List<Vehicle> filteredVehicles = new ArrayList<>();
 
         for(Vehicle v : inventory){
@@ -65,10 +69,10 @@ public class Dealership {
                 filteredVehicles.add(v);
             }
         }
-        return printInventory(filteredVehicles);
+        return filteredVehicles;
     }
 
-    public static List<Vehicle> getVehiclesByYear(int min, int max){
+    public List<Vehicle> getVehiclesByYear(int min, int max){
         List<Vehicle> filteredVehicles = new ArrayList<>();
 
         for (Vehicle v : inventory){
@@ -76,10 +80,10 @@ public class Dealership {
                 filteredVehicles.add(v);
             }
         }
-        return printInventory(filteredVehicles);
+        return filteredVehicles;
     }
 
-    public static List<Vehicle> getVehiclesByColor(String color){
+    public List<Vehicle> getVehiclesByColor(String color){
         List<Vehicle> filteredVehicles = new ArrayList<>();
 
         for(Vehicle v : inventory){
@@ -87,10 +91,10 @@ public class Dealership {
                 filteredVehicles.add(v);
             }
         }
-        return printInventory(filteredVehicles);
+        return filteredVehicles;
     }
 
-    public static List<Vehicle> getVehiclesByMileage(int min, int max){
+    public List<Vehicle> getVehiclesByMileage(int min, int max){
 
         List<Vehicle> filteredVehicles = new ArrayList<>();
 
@@ -99,10 +103,10 @@ public class Dealership {
                 filteredVehicles.add(v);
             }
         }
-        return printInventory(filteredVehicles);
+        return filteredVehicles;
     }
 
-    public static List<Vehicle> getVehiclesByType(String vehicleType){
+    public List<Vehicle> getVehiclesByType(String vehicleType){
 
         List<Vehicle> filteredVehicles = new ArrayList<>();
 
@@ -111,14 +115,22 @@ public class Dealership {
                 filteredVehicles.add(v);
             }
         }
-        return printInventory(filteredVehicles);
+        return filteredVehicles;
     }
 
-    public static void getAllVehicles(){
-        printInventory(readInventory());
+    public List<Vehicle> getAllVehicles(){
+       return new ArrayList<>(inventory);
     }
 
-    public static void addVehicle(){
+    public void displayAllVehicles(){
+        if(inventory == null || inventory.isEmpty()){
+            System.out.println("This inventory empty");
+        }else {
+            DealershipFileManager.printInventory(this);
+        }
+    }
+
+    public  void addVehicle(){
 
         System.out.println("-----------------------");
         System.out.println("Add Vehicle to Inventory");
@@ -155,38 +167,50 @@ public class Dealership {
          inventory.add(vehicle);
 
          //Call static method in DealershipFileManager class to write new vehicle to csv file(Inventory)
-        DealershipFileManager.addToCsv(vehicle);
-    }
-    public static void removeVehicle(){
+        DealershipFileManager.addVehicleToFile(vehicle);
 
-        List<Vehicle> vehicleList = readInventory();
+        System.out.println("Vehicle added successfully");
+    }
+
+    public void removeVehicle(){
+
+        //Check for leftover line to munch on
+        if(scan.hasNextLine()){
+            scan.nextLine();
+        }
 
         System.out.print("Enter VIN of vehicle to remove: ");
-        String vin = scan.nextLine();
+        String vin = scan.nextLine().trim();
 
         Vehicle vehicleToPackUp = null;
 
-        for(Vehicle v : vehicleList){
-            if(v.getVin().equalsIgnoreCase(vin)){
+        for(Vehicle v : inventory){
+            if(v.getVin().trim().equalsIgnoreCase(vin)){
                 vehicleToPackUp = v;
                 break;
             }
         }
 
+        //if no match found
         if(vehicleToPackUp == null){
             System.out.println("Vehicle with VIN " + vin + " not found.");
             return;
         }
 
+        //Display found vehicle
         System.out.println("\n Vehicle found: ");
         System.out.printf("%-15s| %-5d| %-15s| %-15s| %-10s| %-8s| %-10d| $%-10.2f%n", vehicleToPackUp.getVin(),vehicleToPackUp.getYear(),vehicleToPackUp.getMake(),vehicleToPackUp.getModel(),vehicleToPackUp.getVehicleType(),vehicleToPackUp.getColor(),vehicleToPackUp.getOdometer(),vehicleToPackUp.getPrice());
 
+        //Confirm removal
         System.out.println("\nAre you sure you want to remove this vehicle? (Y/N)");
         String confirm = scan.nextLine().trim();
 
         if(confirm.equalsIgnoreCase("Y")){
-            vehicleList.remove(vehicleToPackUp);
-            rewriteCsv(vehicleList);
+            inventory.remove(vehicleToPackUp);
+            System.out.println("Vehicle Removed Successfully.");
+
+            //Save updated inventory back to file
+            DealershipFileManager.rewriteCsv(this);
         }else{
             System.out.println("Removal cancelled;");
         }

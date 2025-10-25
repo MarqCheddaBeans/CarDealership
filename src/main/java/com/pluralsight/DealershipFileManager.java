@@ -8,21 +8,28 @@ public class DealershipFileManager {
 
     public static String filePath = "src/main/resources/Inventory";
 
-    public static List<Vehicle> readInventory(){
+    public static Dealership getDealership(){
 
         List<Vehicle> vehicle = new ArrayList<>();
 
-        try(BufferedReader buffRead = new BufferedReader(new FileReader(filePath))){
+        String name = "";
+        String address = "";
+        String phone = "";
 
+        try(BufferedReader buffRead = new BufferedReader(new FileReader(filePath))){
             String line;
 
+            //Read header
+            if((line= buffRead.readLine()) !=null){
+                String[] header = line.split("\\|");
+                name = header[0].trim();
+                address = header[1].trim();
+                phone = header[2].trim();
+            }
+
+            //Read vehicles in inventory
             while((line = buffRead.readLine()) !=null){
-
                 String[] vehicleInfo = line.split("\\|");
-
-                if(vehicleInfo[0].contains("Buy")){
-                    continue;
-                }
 
                 try{
 
@@ -43,14 +50,14 @@ public class DealershipFileManager {
         }catch(IOException e){
             System.out.println("Cant read file");
         }
-        return vehicle;
+        return new Dealership(name,address,phone, vehicle);
     }
 
-    public static void addToCsv(Vehicle v){
+    public static void addVehicleToFile(Vehicle v){
 
         try(BufferedWriter buffWrite = new BufferedWriter(new FileWriter(filePath,true))){
 
-                String formatVehicle = String.format("%-15s| %-5d| %-15s| %-15s| %-10s| %-8s| %-10s| %-10.2f",v.getVin(),v.getYear(),v.getMake(),v.getModel(),v.getVehicleType(), v.getColor(), v.getOdometer(), v.getPrice());
+                String formatVehicle = String.format("%-15s| %-5d| %-15s| %-15s| %-10s| %-8s| %-10s| %-10.2f",v.getVin().trim(),v.getYear(),v.getMake(),v.getModel(),v.getVehicleType(), v.getColor(), v.getOdometer(), v.getPrice());
 
                 buffWrite.write(formatVehicle);
                 buffWrite.newLine();
@@ -61,12 +68,17 @@ public class DealershipFileManager {
         }
     }
 
-    public static void rewriteCsv(List<Vehicle> vehicleList){
+    public static void rewriteCsv(Dealership dealership){
 
         try(BufferedWriter buffWrite = new BufferedWriter(new FileWriter(filePath))){
-            for(Vehicle v : vehicleList){
 
-                String formatVehicle = String.format("%-15s| %-5d| %-15s| %-15s| %-10s| %-8s| %-10s| %-10.2f",v.getVin(),v.getYear(),v.getMake(),v.getModel(),v.getVehicleType(), v.getColor(), v.getOdometer(), v.getPrice());
+            //Keep header when rewriting file
+            buffWrite.write(String.format("%-25s| %-25s| %-25s", getDealership(),getDealership().getAddress(),getDealership().getPhone()));
+            buffWrite.newLine();
+
+            //Write vehicles
+            for(Vehicle v : dealership.getInventory()){
+                String formatVehicle = String.format("%-15s| %-5d| %-15s| %-15s| %-10s| %-8s| %-10s| %-10.2f",v.getVin().trim(),v.getYear(),v.getMake(),v.getModel(),v.getVehicleType(), v.getColor(), v.getOdometer(), v.getPrice());
 
                 buffWrite.write(formatVehicle);
                 buffWrite.newLine();
@@ -78,7 +90,9 @@ public class DealershipFileManager {
         }
     }
 
-    public static List<Vehicle> printInventory(List<Vehicle> vehicleList){
+    public static List<Vehicle> printInventory(Dealership dealership){
+
+        List<Vehicle> vehicleList = dealership.getInventory();
 
         //check if list exists or if it has no elements
         if(vehicleList == null || vehicleList.isEmpty()){
@@ -86,7 +100,8 @@ public class DealershipFileManager {
             System.out.println("No vehicles found.");
             return vehicleList;
         }
-        String header = String.format("%-25s| %-25s| %-25s","BuyNowRegretLater", "Dimension C-137" , "1-877-FAST-AF");
+
+        String header = String.format("%-25s| %-25s| %-25s",dealership.getName(), dealership.getAddress() , dealership.getPhone());
         System.out.println(header);
 
         for(Vehicle v : vehicleList){
@@ -97,6 +112,23 @@ public class DealershipFileManager {
         }
 
         return vehicleList;
+    }
+
+    //Overload printInventory method to accept List object , and dealer, helps display filtered vehicles
+    public static void printInventory(List<Vehicle> vehicleList, Dealership dealer) {
+        // Print header
+        System.out.printf("%-25s| %-25s| %-25s%n", dealer.getName(), dealer.getAddress(), dealer.getPhone());
+
+        if(vehicleList == null || vehicleList.isEmpty()){
+            System.out.println("No vehicles found.");
+            return;
+        }
+
+        for(Vehicle v : vehicleList){
+            System.out.printf("%-15s| %-5d| %-15s| %-15s| %-10s| %-8s| %-10d| $%-10.2f%n",
+                    v.getVin(), v.getYear(), v.getMake(), v.getModel(),
+                    v.getVehicleType(), v.getColor(), v.getOdometer(), v.getPrice());
+        }
     }
 
 }
