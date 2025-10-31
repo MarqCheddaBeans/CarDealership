@@ -12,17 +12,12 @@ public class DealershipFileManager {
         Dealership dealer = null;
 
         try(BufferedReader buffRead = new BufferedReader(new FileReader(filePath))){
-            String line;
 
-            //Read header
-            if((line = buffRead.readLine()) !=null){
-                String[] header = line.split("\\|");
-                String name = header[0].trim();
-                String address = header[1].trim();
-                String phone = header[2].trim();
+                String dealerHeader = buffRead.readLine();
 
-                dealer = new Dealership(name, address, phone);
-            }
+                String[] headerParts = dealerHeader.split("\\|");
+
+                dealer = new Dealership(headerParts[0], headerParts[1], headerParts[2]);
 
             //Read vehicles in inventory
             String vehicleLines;
@@ -42,7 +37,7 @@ public class DealershipFileManager {
                     Vehicle vehicle = new Vehicle(vin,year,make,model,type,color,odometer,price);
                     dealer.addVehicle(vehicle);
 
-                }catch(Exception e){
+                }catch(NullPointerException e){
                     System.out.println("Error reading");
                 }
             }
