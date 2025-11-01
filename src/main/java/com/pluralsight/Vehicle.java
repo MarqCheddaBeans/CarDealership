@@ -2,6 +2,7 @@ package com.pluralsight;
 
 public class Vehicle {
 
+    //declare properties
     private String vin;
     private int year;
     private String make;
@@ -12,7 +13,7 @@ public class Vehicle {
     private double price;
 
 
-
+    //Constructor
     public Vehicle(String vin, int year, String make, String model, String vehicleType, String color, int odometer, double price) {
         this.vin = vin;
         this.year = year;
@@ -23,7 +24,7 @@ public class Vehicle {
         this.odometer = odometer;
         this.price = price;
     }
-
+    //Lotta getters
     public String getVin() {
         return vin;
     }

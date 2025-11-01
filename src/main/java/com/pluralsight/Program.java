@@ -1,12 +1,14 @@
 package com.pluralsight;
 
-import static com.pluralsight.UserInterface.*;
-
 public class Program {
 
     public static void main(String[] args) {
 
-        display();
+        // Create UI object
+        UserInterface ui = new UserInterface();
+
+        //Run app
+        ui.display();
 
     }
 }

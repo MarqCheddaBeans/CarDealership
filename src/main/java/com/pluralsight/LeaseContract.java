@@ -7,14 +7,24 @@ public class LeaseContract extends Contract{
     private static final int LEASE_MONTHS = 36;
     private double expectedEndingValue;
     private double leaseFee;
+    private String contractType;
+    private boolean financed;
 
-    public LeaseContract(String date, String customerName, String customerEmail, Vehicle vehicleSold) {
+    //constructor
+    public LeaseContract(String date, String customerName, String customerEmail, Vehicle vehicleSold, boolean financed) {
         super(date, customerName, customerEmail, vehicleSold);
 
         //Calculate expected ending value and lease fee when contract is created
         double price = vehicleSold.getPrice();
         this.expectedEndingValue = price * .5;
         this.leaseFee = price * 0.07;
+        this.contractType = "LEASE";
+        this.financed = financed;
+    }
+
+    //Getters
+    public String getContractType() {
+        return contractType;
     }
 
     public double getExpectedEndingValue() {
@@ -25,10 +35,14 @@ public class LeaseContract extends Contract{
         return leaseFee;
     }
 
+    public boolean isFinanced(){
+        return financed;
+    }
+
     //Override abstract method for Lease pricing
     @Override
     public double getTotalPrice(){
-
+        //Calculate total price
         double price = (getVehicleSold().getPrice() - expectedEndingValue) + leaseFee;
 
         return price;
@@ -42,9 +56,9 @@ public class LeaseContract extends Contract{
         double monthlyRate = LEASE_RATE/12;
 
         // Standard amortization formula -> P = r * PV / (1 - (1 + r)^(-n))
-        double monthPay = (totalPrice * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -LEASE_MONTHS));
+        monthlyPayment = (totalPrice * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -LEASE_MONTHS));
 
-        return monthPay;
+        return monthlyPayment;
     }
 
 }
