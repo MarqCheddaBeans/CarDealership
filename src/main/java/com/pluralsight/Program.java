@@ -7,7 +7,7 @@ public class Program {
         // Create UI object
         UserInterface ui = new UserInterface();
 
-        //Run app
+        //Run the app
         ui.display();
 
     }
