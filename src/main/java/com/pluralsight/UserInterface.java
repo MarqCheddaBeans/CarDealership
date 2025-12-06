@@ -1,5 +1,9 @@
 package com.pluralsight;
 
+import com.pluralsight.dao.ContractDao;
+import com.pluralsight.dao.VehicleDao;
+import org.apache.commons.dbcp2.BasicDataSource;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -10,15 +14,14 @@ public class UserInterface {
     //Declare Dealership object named dealer and Static scanner
     private Dealership dealer;
     public static Scanner scan = new Scanner(System.in);
-
     //Empty constructor
     public UserInterface(){}
 
     //This method here is the stage of sorts
-    public void display(){
+    public void display(String user, String pass){
 
         //Call init method to initialize dealership
-        init();
+        BasicDataSource bds = init(user, pass);
 
         //Keep menu looping until user wants to exit
         int choice = -1;
@@ -96,16 +99,31 @@ public class UserInterface {
         }
     }
 
-    //Pulls dealer inventory from file, initializes app
-    private void init(){
-        dealer = DealershipFileManager.getDealership();
+    //Configures BasicDataSource to connect to our database, initializes app
+    private BasicDataSource init(String user, String pass){
+        BasicDataSource bds = new BasicDataSource();
+
+        bds.setUrl("jdbc:mysql://localhost:3306/dealership");
+        bds.setUsername(user);
+        bds.setPassword(pass);
+
+        //Automatically open 5 connections in pool
+        bds.setInitialSize(5);
+        //Max 20 connections open at a time
+        bds.setMaxTotal(20);
+        //Max 10 idle connections allowed open
+        bds.setMaxIdle(10);
+
+        return bds;
     }
 
     //Method that allows user to Buy or Lease vehicles
-    public void processBuyLeaseVehicleRequest(){
+    public void processBuyLeaseVehicleRequest(BasicDataSource bds){
 
-        //Create instance of ContractDataManager
-        ContractDataManager cdm = new ContractDataManager();
+
+        ContractDao cDao = new ContractDao(bds);
+
+        VehicleDao vDao = new VehicleDao(bds);
         //Get live date for contract date and format to preference
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MM-dd-yyyy");
         String date = LocalDate.now().format(dateFormat);
@@ -119,23 +137,13 @@ public class UserInterface {
         System.out.println("===================================");
 
         //display all vehicles for user to choose and prompt for info
-        processGetByAllVehiclesRequest();
+        processGetByAllVehiclesRequest(bds);
 
         System.out.print("\nEnter vin of vehicle you are interested in: ");
         String vin = scan.nextLine().trim();
 
         //Create vehicle object set to null for now, will be for the chosen vehicle
-        Vehicle interestedVehicle = null;
-
-        //Cycle through vehicles
-        for(Vehicle v: dealer.getAllVehicles()){
-            //check for vehicles with same vin as user input
-            if(v.getVin().equalsIgnoreCase(vin)){
-                //if found, store in our vehicle object created before and break loop
-                interestedVehicle = v;
-                break;
-            }
-        }
+        Vehicle interestedVehicle = dealer.getVehicleByVin(bds, vin);
 
         //check if any vehicle was found
         if(interestedVehicle == null){
@@ -146,7 +154,7 @@ public class UserInterface {
 
         //display found vehicle
         System.out.println("Vehicle found!\n");
-        System.out.printf("%-15s| %-5d| %-15s| %-15s| %-10s| %-8s| %-10d| $%-10.2f%n", interestedVehicle.getVin(),interestedVehicle.getYear(),interestedVehicle.getMake(),interestedVehicle.getModel(),interestedVehicle.getVehicleType(),interestedVehicle.getColor(),interestedVehicle.getOdometer(),interestedVehicle.getPrice());
+        System.out.printf("%-15s| %-5d| %-15s| %-15s| %-10s| %-8s| %-10d| $%-10.2f%n", interestedVehicle.getVin(),interestedVehicle.getYear(),interestedVehicle.getMake(),interestedVehicle.getModel(),interestedVehicle.getVehicleType(),interestedVehicle.getColor(),interestedVehicle.getMileage(),interestedVehicle.getPrice());
 
         //Ask user for confirmation
         System.out.print("Are you sure you would like to purchase this vehicle? (Y/N): ");
@@ -183,12 +191,11 @@ public class UserInterface {
                     //assign contract to salescontract and add information according
                     buyLease = new SalesContract(date, name, email, interestedVehicle,false);
 
-                    //call ContractDataManager to save this contract and print confirmation
-                    cdm.saveContract(buyLease);
+                    //ADD VEHICLE TO SALES CONTRACT
+
 
                     //Remove vehicle and update inventory
-                    dealer.removeVehicle(interestedVehicle);
-                    DealershipFileManager.saveDealership(dealer);
+                    vDao.removeVehicle(interestedVehicle);
                     System.out.println("Purchase successful!");
 
                     //check if user financed
@@ -273,10 +280,12 @@ public class UserInterface {
     }
 
     //Method that allows user to remove vehicles
-    public void processRemoveVehicleRequest(){
+    public void processRemoveVehicleRequest(BasicDataSource bds){
+
+        VehicleDao vDao = new VehicleDao(bds);
 
         //Display inventory for user to choose
-        processGetByAllVehiclesRequest();
+        processGetByAllVehiclesRequest(bds);
 
         //prompt user for info
         System.out.print("Enter VIN of vehicle to remove: ");
@@ -285,15 +294,7 @@ public class UserInterface {
         //create Vehicle object for vehicle to pack up, set as null for now
         Vehicle vehicleToPackUp = null;
 
-        //cycle through inventory
-        for(Vehicle v : dealer.getAllVehicles()){
-            //check for vehicle with matching vin as user input
-            if(v.getVin().trim().equalsIgnoreCase(vin)){
-                //if found add vehicle to our vehicle object that was set to null and leave loop
-                vehicleToPackUp = v;
-                break;
-            }
-        }
+        vehicleToPackUp = dealer.getVehicleByVin(bds, vin);
 
         //if no match found
         if(vehicleToPackUp == null){
@@ -303,7 +304,7 @@ public class UserInterface {
 
         //Display found vehicle
         System.out.println("\n Vehicle found: ");
-        System.out.printf("%-15s| %-5d| %-15s| %-15s| %-10s| %-8s| %-10d| $%-10.2f%n", vehicleToPackUp.getVin(),vehicleToPackUp.getYear(),vehicleToPackUp.getMake(),vehicleToPackUp.getModel(),vehicleToPackUp.getVehicleType(),vehicleToPackUp.getColor(),vehicleToPackUp.getOdometer(),vehicleToPackUp.getPrice());
+        System.out.printf("%-15s| %-5d| %-15s| %-15s| %-10s| %-8s| %-10d| $%-10.2f%n", vehicleToPackUp.getVin(),vehicleToPackUp.getYear(),vehicleToPackUp.getMake(),vehicleToPackUp.getModel(),vehicleToPackUp.getVehicleType(),vehicleToPackUp.getColor(),vehicleToPackUp.getMileage(),vehicleToPackUp.getPrice());
 
         //Confirm removal
         System.out.println("\nAre you sure you want to remove this vehicle? (Y/N)");
@@ -313,8 +314,7 @@ public class UserInterface {
         if(confirm.equalsIgnoreCase("Y")){
 
             //if confirmed remove vehicle and update dealer inventory
-            dealer.removeVehicle(vehicleToPackUp);
-            DealershipFileManager.saveDealership(dealer);
+            vDao.removeVehicle(vehicleToPackUp);
             System.out.println("Vehicle Removed Successfully.");
         }else{
             System.out.println("Removal cancelled;");
@@ -322,7 +322,7 @@ public class UserInterface {
     }
 
     //Method that allows user to filter vehicles by price
-    public void processGetByPriceRequest(){
+    public void processGetByPriceRequest(BasicDataSource bds){
 
         //prompt user for info
         System.out.print("Enter a minimum price: ");
@@ -332,12 +332,12 @@ public class UserInterface {
         scan.nextLine();
 
         //call method to filter vehicles and display to user
-        List<Vehicle> filteredV = dealer.getVehiclesByPrice(min, max);
+        List<Vehicle> filteredV = dealer.getVehiclesByPrice(bds, min, max);
         printInventory(filteredV);
     }
 
     //Method that allows user to filter vehicels by make and model
-    public void processByMakeModelRequest(){
+    public void processByMakeModelRequest(BasicDataSource bds){
 
         //prompt user for info
         System.out.print("Enter vehicle make: ");
@@ -346,12 +346,12 @@ public class UserInterface {
         String model = scan.nextLine();
 
         //call method to filter vehicles and display to user
-        List<Vehicle> filteredV = dealer.getVehiclesByMakeModel(make,model);
+        List<Vehicle> filteredV = dealer.getVehiclesByMakeModel(bds,make,model);
         printInventory(filteredV);
     }
 
     //Method that allows user to filter vehicels by year
-    public void processByYearRequest(){
+    public void processByYearRequest(BasicDataSource bds){
 
         //prompt user for info
         System.out.print("Enter minimum year: ");
@@ -360,24 +360,24 @@ public class UserInterface {
         int max = scan.nextInt();
 
         //call method to filter vehicles and display to user
-        List<Vehicle> filteredV = dealer.getVehiclesByYear(min,max);
+        List<Vehicle> filteredV = dealer.getVehiclesByYear(bds,min,max);
         printInventory(filteredV);
     }
 
     //Method that allows user to filter vehicels by color
-    public void processByColorRequest(){
+    public void processByColorRequest(BasicDataSource bds){
 
         //prompt user for info
         System.out.print("Enter color: ");
         String color = scan.nextLine();
 
         //call method to filter vehicles and display to user
-        List<Vehicle> filteredV = dealer.getVehiclesByColor(color);
+        List<Vehicle> filteredV = dealer.getVehiclesByColor(bds,color);
         printInventory(filteredV);
     }
 
     //Method that allows user to filter vehicels by mileage
-    public void processByMileageRequest(){
+    public void processByMileageRequest(BasicDataSource bds){
 
         //prompt user for info
         System.out.print("Enter minimum mileage: ");
@@ -387,32 +387,32 @@ public class UserInterface {
         scan.nextLine();
 
         //call method to filter vehicles and display to user
-        List<Vehicle> filteredV = dealer.getVehiclesByMileage(min,max);
+        List<Vehicle> filteredV = dealer.getVehiclesByMileage(bds,min,max);
         printInventory(filteredV);
     }
 
     //Method that allows user to filter vehicels by type
-    public void processByVehicleTypeRequest(){
+    public void processByVehicleTypeRequest(BasicDataSource bds){
         //prompt user for info
         System.out.print("Enter vehicle type (Sedan, Truck, SUV, Van): ");
         String type = scan.nextLine();
 
         //call method to filter vehicles
-        List<Vehicle> filteredV = dealer.getVehiclesByType(type);
+        List<Vehicle> filteredV = dealer.getVehiclesByType(bds,type);
         printInventory(filteredV);
     }
 
     //Method that displays all of the vehicles in inventory
-    public void processGetByAllVehiclesRequest(){
+    public void processGetByAllVehiclesRequest(BasicDataSource bds){
 
         //Store all vehicles in list named inventory and printing to screen
-        List<Vehicle> inventory = dealer.getAllVehicles();
+        List<Vehicle> inventory = dealer.getAllVehicles(bds);
         printInventory(inventory);
 
     }
 
     //Method that allows user to add vehicles to inventory
-    public void processAddVehicleRequest(){
+    public void processAddVehicleRequest(BasicDataSource bds){
 
         //Little header to let user know whats going on
         System.out.println("-----------------------");
@@ -450,10 +450,8 @@ public class UserInterface {
         Vehicle vehicle = new Vehicle(vin,year,make,model,type,color,mileage,price);
 
         //add vehicle to inventory
-        dealer.addVehicle(vehicle);
+        dealer.addVehicle(bds, vehicle);
 
-        //update dealer inventory and display confirmation
-        DealershipFileManager.saveDealership(dealer);
         System.out.println("Vehicle added successfully");
     }
 
@@ -470,7 +468,7 @@ public class UserInterface {
 
         //cycles through list of vehicles and prints them out
         for (Vehicle v : vehicleList) {
-            System.out.printf("%-10s| %-5d| %-15s| %-15s| %-10s| %-8s| %-10d| $%-10.2f%n",v.getVin(), v.getYear(), v.getMake(), v.getModel(),v.getVehicleType(), v.getColor(), v.getOdometer(), v.getPrice());
+            System.out.printf("%-10s| %-5d| %-15s| %-15s| %-10s| %-8s| %-10d| $%-10.2f%n",v.getVin(), v.getYear(), v.getMake(), v.getModel(),v.getVehicleType(), v.getColor(), v.getMileage(), v.getPrice());
             }
     }
 

@@ -1,5 +1,13 @@
 package com.pluralsight;
 
+import com.mysql.cj.x.protobuf.MysqlxPrepare;
+import com.pluralsight.dao.VehicleDao;
+import org.apache.commons.dbcp2.BasicDataSource;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,99 +39,319 @@ public class Dealership {
     }
 
     //Method to filter vehicles by min and max price
-    public List<Vehicle> getVehiclesByPrice(double min, double max){
-        List<Vehicle> filteredVehicles = new ArrayList<>();
+    public List<Vehicle> getVehiclesByPrice(BasicDataSource bds, double min, double max){
+        List<Vehicle> vehicles = new ArrayList<>();
 
-        for(Vehicle v : inventory){
-            if(v.getPrice()>= min && v.getPrice()<=max){
-                filteredVehicles.add(v);
+        try(
+                Connection c = bds.getConnection();
+                PreparedStatement q = c.prepareStatement("""
+                        SELECT
+                            *
+                        FROM
+                            vehicles
+                        WHERE
+                            price BETWEEN ? AND ?
+                        """)
+        ){
+            q.setDouble(1,min);
+            q.setDouble(2,max);
+            try(ResultSet r = q.executeQuery()){
+                while(r.next()){
+                    String vin = r.getString("vin");
+                    int year = r.getInt("year");
+                    String make = r.getString("make");
+                    String model = r.getString("model");
+                    String vehicleType = r.getString("vehicle_type");
+                    int mileage = r.getInt("mileage");
+                    String color = r.getString("color");
+                    double price = r.getDouble("price");
+
+                    Vehicle v = new Vehicle(vin,year,make,model,vehicleType,color,mileage,price);
+                    vehicles.add(v);
+                }
             }
+        }catch(SQLException e){
+            System.out.println("Error" + e);
         }
-        return filteredVehicles;
+        return vehicles;
     }
 
     //Method to filter vehicles by make and model
-    public List<Vehicle> getVehiclesByMakeModel(String make, String model){
-        List<Vehicle> filteredVehicles = new ArrayList<>();
+    public List<Vehicle> getVehiclesByMakeModel(BasicDataSource bds ,String make, String model){
+        List<Vehicle> vehicles = new ArrayList<>();
 
-        for(Vehicle v : inventory){
-            if(v.getMake().toLowerCase().contains(make.toLowerCase()) && v.getModel().toLowerCase().contains(model.toLowerCase())){
-                filteredVehicles.add(v);
+        try(
+                Connection c = bds.getConnection();
+                PreparedStatement q = c.prepareStatement("""
+                        SELECT
+                            *
+                        FROM
+                            vehicles
+                        WHERE
+                            make = ? OR model = ?
+                        """)
+        ){
+            q.setString(1,make);
+            q.setString(2, model);
+
+            try(ResultSet r = q.executeQuery()){
+                while(r.next()){
+                    String vin = r.getString("vin");
+                    int year = r.getInt("year");
+                    String make = r.getString("make");
+                    String model = r.getString("model");
+                    String vehicleType = r.getString("vehicle_type");
+                    int mileage = r.getInt("mileage");
+                    String color = r.getString("color");
+                    double price = r.getDouble("price");
+
+                    Vehicle v = new Vehicle(vin,year,make,model,vehicleType,color,mileage,price);
+                    vehicles.add(v);
+                }
             }
+        }catch(SQLException e){
+            System.out.println("Error" + e);
         }
-        return filteredVehicles;
+        return vehicles;
     }
 
     //Method to filter vehicles by min and max year
-    public List<Vehicle> getVehiclesByYear(int min, int max){
-        List<Vehicle> filteredVehicles = new ArrayList<>();
+    public List<Vehicle> getVehiclesByYear(BasicDataSource bds, int min, int max){
+        List<Vehicle> vehicles = new ArrayList<>();
 
-        for (Vehicle v : inventory){
-            if(v.getYear()>=min && v.getYear()<=max){
-                filteredVehicles.add(v);
+        try(
+                Connection c = bds.getConnection();
+                PreparedStatement q = c.prepareStatement("""
+                        SELECT
+                            *
+                        FROM
+                            vehicles
+                        WHERE
+                            year BETWEEN ? AND ?
+                        """)
+        ){
+            q.setInt(1,min);
+            q.setInt(2,max);
+
+            try(ResultSet r = q.executeQuery()){
+                while(r.next()){
+                    String vin = r.getString("vin");
+                    int year = r.getInt("year");
+                    String make = r.getString("make");
+                    String model = r.getString("model");
+                    String vehicleType = r.getString("vehicle_type");
+                    int mileage = r.getInt("mileage");
+                    String color = r.getString("color");
+                    double price = r.getDouble("price");
+
+                    Vehicle v = new Vehicle(vin,year,make,model,vehicleType,color,mileage,price);
+                    vehicles.add(v);
+                }
             }
+        }catch(SQLException e){
+            System.out.println("Error" + e);
         }
-        return filteredVehicles;
+        return vehicles;
     }
 
     //Methdod to filter vehicles by color
-    public List<Vehicle> getVehiclesByColor(String color){
-        List<Vehicle> filteredVehicles = new ArrayList<>();
+    public List<Vehicle> getVehiclesByColor(BasicDataSource bds, String col){
+        List<Vehicle> vehicles = new ArrayList<>();
 
-        for(Vehicle v : inventory){
-            if(v.getColor().equalsIgnoreCase(color)){
-                filteredVehicles.add(v);
+        try(
+                Connection c = bds.getConnection();
+                PreparedStatement q = c.prepareStatement("""
+                        SELECT
+                            *
+                        FROM
+                            vehicles
+                        WHERE
+                            color = ?
+                        """)
+                ){
+            q.setString(1,col);
+            try(ResultSet r = q.executeQuery()){
+                while(r.next()){
+                    String vin = r.getString("vin");
+                    int year = r.getInt("year");
+                    String make = r.getString("make");
+                    String model = r.getString("model");
+                    String vehicleType = r.getString("vehicle_type");
+                    int mileage = r.getInt("mileage");
+                    String color = r.getString("color");
+                    double price = r.getDouble("price");
+
+                    Vehicle v = new Vehicle(vin,year,make,model,vehicleType,color,mileage,price);
+                    vehicles.add(v);
+                }
             }
+        }catch(SQLException e){
+            System.out.println("Error" + e);
         }
-        return filteredVehicles;
+        return vehicles;
     }
 
     //Methdod to filter vehicles by min and max miles
-    public List<Vehicle> getVehiclesByMileage(int min, int max){
+    public List<Vehicle> getVehiclesByMileage(BasicDataSource bds, int min, int max){
 
-        List<Vehicle> filteredVehicles = new ArrayList<>();
+        List<Vehicle> vehicles = new ArrayList<>();
 
-        for(Vehicle v : inventory){
-            if(v.getOdometer()>=min && v.getOdometer()<=max){
-                filteredVehicles.add(v);
+        try(
+                Connection c = bds.getConnection();
+                PreparedStatement q = c.prepareStatement("""
+                        SELECT
+                            *
+                        FROM
+                            vehicles
+                        WHERE
+                            mileage BETWEEN ? AND ?
+                        """);
+                ){
+            q.setInt(1,min);
+            q.setInt(2, max);
+            try(ResultSet r = q.executeQuery()){
+                String vin = r.getString("vin");
+                int year = r.getInt("year");
+                String make = r.getString("make");
+                String model = r.getString("model");
+                String vehicleType = r.getString("vehicle_type");
+                int mileage = r.getInt("mileage");
+                String color = r.getString("color");
+                double price = r.getDouble("price");
+
+                Vehicle v = new Vehicle(vin,year,make,model,vehicleType,color,mileage,price);
+                vehicles.add(v);
             }
+
+        }catch(SQLException e){
+            System.out.println("What in tarnation" + e);
         }
-        return filteredVehicles;
+
+        return vehicles;
     }
 
     //Methdod to filter vehicles by vehicle type
-    public List<Vehicle> getVehiclesByType(String vehicleType){
+    public List<Vehicle> getVehiclesByType(BasicDataSource bds, String type){
 
-        List<Vehicle> filteredVehicles = new ArrayList<>();
+        List<Vehicle> vehicles = new ArrayList<>();
 
-        for(Vehicle v : inventory){
-            if(v.getVehicleType().equalsIgnoreCase(vehicleType)){
-                filteredVehicles.add(v);
-            }
-        }
-        return filteredVehicles;
-    }
+        try(
+                Connection c = bds.getConnection();
+                PreparedStatement q = c.prepareStatement("""
+                        SELECT 
+                            *
+                        FROM
+                            vehicles
+                        WHERE
+                            vehicle_Type = ?                        
+                        """)
+                ){
+            q.setString(1, type);
+            try(ResultSet r = q.executeQuery()){
+                while(r.next()){
+                    String vin = r.getString("vin");
+                    int year = r.getInt("year");
+                    String make = r.getString("make");
+                    String model = r.getString("model");
+                    String vehicleType = r.getString("vehicle_type");
+                    int mileage = r.getInt("mileage");
+                    String color = r.getString("color");
+                    double price = r.getDouble("price");
 
-    //Method to get all vehicles in inventory
-    public List<Vehicle> getAllVehicles(){
-        return this.inventory;
-    }
-
-    //Method to add a vehicle to inventory
-    public void addVehicle(Vehicle vehicle){
-        this.inventory.add(vehicle);
-    }
-
-    //Method to remove a vehicle from inventory
-    public void removeVehicle(Vehicle vehicle) {
-
-            for (int i = 0; i < inventory.size(); i++){
-                if (inventory.get(i).getVin().equalsIgnoreCase(vehicle.getVin()) ) {
-                    inventory.remove(i);
-                    break;
+                    Vehicle v = new Vehicle(vin,year,make,model,vehicleType,color,mileage,price);
+                    vehicles.add(v);
                 }
             }
 
+        }catch(SQLException e){
+            System.out.println("MY LEG!");
+        }
+
+        return vehicles;
+    }
+
+    public Vehicle getVehicleByVin(BasicDataSource bds, String s){
+
+        Vehicle vehicle = null;
+
+        try(
+                Connection c = bds.getConnection();
+                PreparedStatement q = c.prepareStatement("""
+                        SELECT 
+                            *
+                        FROM
+                            vehicles
+                        WHERE
+                            vehicle_Type = ?                        
+                        """)
+        ){
+            q.setString(1, s);
+            try(ResultSet r = q.executeQuery()){
+                while(r.next()){
+                    String vin = r.getString("vin");
+                    int year = r.getInt("year");
+                    String make = r.getString("make");
+                    String model = r.getString("model");
+                    String vehicleType = r.getString("vehicle_type");
+                    int mileage = r.getInt("mileage");
+                    String color = r.getString("color");
+                    double price = r.getDouble("price");
+
+                    vehicle = new Vehicle(vin,year,make,model,vehicleType,color,mileage,price);
+                }
+            }
+
+        }catch(SQLException e){
+            System.out.println("MY LEG!");
+        }
+
+        return vehicle;
+    }
+
+    //Method to get all vehicles in inventory
+    public List<Vehicle> getAllVehicles(BasicDataSource bds){
+        List<Vehicle> vehicles = new ArrayList<>();
+
+        try(
+                Connection c = bds.getConnection();
+                PreparedStatement q = c.prepareStatement("SELECT * FROM vehicles")
+
+                ){
+            ResultSet r = q.executeQuery();
+
+            while(r.next()){
+                String vin = r.getString("vin");
+                int year = r.getInt("year");
+                String make = r.getString("make");
+                String model = r.getString("model");
+                String vehicleType = r.getString("vehicle_type");
+                int mileage = r.getInt("mileage");
+                String color = r.getString("color");
+                double price = r.getDouble("price");
+
+                Vehicle v = new Vehicle(vin,year,make,model,vehicleType,color,mileage,price);
+                vehicles.add(v);
+            }
+        }catch(SQLException e){
+            System.out.println("Oops" + e);
+        }
+
+        return vehicles;
+    }
+
+    //Method to add a vehicle to inventory
+    public void addVehicle(BasicDataSource bds ,Vehicle vehicle){
+        VehicleDao vDao = new VehicleDao(bds);
+
+        vDao.addVehicle(vehicle);
+
+    }
+
+    @Override
+    public String toString(){
+        String format = String.format("%-25s| %-25s| %-25s", this.name, this.address, this.phone);
+
+        return format;
     }
 
 }

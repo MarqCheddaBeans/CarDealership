@@ -11,8 +11,8 @@ public class LeaseContract extends Contract{
     private boolean financed;
 
     //constructor
-    public LeaseContract(String date, String customerName, String customerEmail, Vehicle vehicleSold, boolean financed) {
-        super(date, customerName, customerEmail, vehicleSold);
+    public LeaseContract(int id,String date, String customerName, String customerEmail, Vehicle vehicleSold, boolean financed) {
+        super(id,date, customerName, customerEmail, vehicleSold);
 
         //Calculate expected ending value and lease fee when contract is created
         double price = vehicleSold.getPrice();
@@ -39,6 +39,11 @@ public class LeaseContract extends Contract{
         return financed;
     }
 
+    @Override
+    public int getID() {
+        return this.id;
+    }
+
     //Override abstract method for Lease pricing
     @Override
     public double getTotalPrice(){
@@ -61,4 +66,10 @@ public class LeaseContract extends Contract{
         return monthlyPayment;
     }
 
+    @Override
+    public String toString(){
+        String lease = String.format("\n%-6s | %-11s | %-30s | %-30s | %-8s | %-5d | %-12s | %-12s | %-10s | %-10s | %-8dmi | $%-10.2f | $%-8.2f | %-8B | $%-8.2f | $%-8.2f", this.getContractType(), this.getDate(), this.getCustomerName(), this.getCustomerEmail(), this.vehicleSold.getVin(), this.vehicleSold.getYear(), this.vehicleSold.getMake(), this.vehicleSold.getModel(), this.vehicleSold.getVehicleType(), this.vehicleSold.getColor(), this.vehicleSold.getMileage(),this.vehicleSold.getPrice(), this.getLeaseFee(), this.isFinanced() ,this.getTotalPrice(), this.getMonthlyPayment());
+
+        return lease;
+    }
 }

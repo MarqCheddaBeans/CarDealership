@@ -3,6 +3,7 @@ package com.pluralsight;
 public abstract class Contract {
 
     //declare properties
+    protected int id;
     protected String date;
     protected String customerName;
     protected String customerEmail;
@@ -12,6 +13,7 @@ public abstract class Contract {
 
     //constructor
     public Contract(String date, String customerName, String customerEmail, Vehicle vehicleSold) {
+        this.id = id;
         this.date = date;
         this.customerName = customerName;
         this.customerEmail = customerEmail;
@@ -35,6 +37,8 @@ public abstract class Contract {
     }
 
     //abstract classes force children to inherit, contract of sorts
+    public abstract int getID();
+
     public abstract double getTotalPrice();
 
     public abstract double getMonthlyPayment();

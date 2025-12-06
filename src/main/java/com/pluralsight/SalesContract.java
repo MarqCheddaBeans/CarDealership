@@ -8,6 +8,7 @@ public class SalesContract extends Contract{
     private double processingFee;
     private boolean financed;
     private String contractType;
+    private int id;
 
     //the constructor
     public SalesContract(String date, String customerName, String customerEmail, Vehicle vehicleSold, boolean financed) {
@@ -21,6 +22,7 @@ public class SalesContract extends Contract{
     public String getContractType() {
         return contractType;
     }
+
 
     public double getSALES_TAX() {
         //calculate sales tax (5% of vehicle price)
@@ -37,6 +39,11 @@ public class SalesContract extends Contract{
 
     public boolean isFinanced() {
         return financed;
+    }
+
+    @Override
+    public int getID() {
+        return this.id;
     }
 
     @Override
@@ -69,6 +76,13 @@ public class SalesContract extends Contract{
         monthlyPayment = (totalPrice * monthlyRate) / (1 - Math.pow(1 + monthlyRate, - months));
 
         return monthlyPayment;
+    }
+
+    @Override
+    public String toString(){
+        String sale = String.format("\n%-6s | %-11s | %-30s | %-30s | %-8s | %-5d | %-12s | %-12s | %-10s | %-10s | %-8dmi | $%-10.2f | $%-8.2f | $%-8.2f | $%-8.2f | %-8B | $%-8.2f | $%-8.2f", this.getContractType(), this.getDate(), this.getCustomerName(), this.getCustomerEmail(), this.vehicleSold.getVin(), this.vehicleSold.getYear(), this.vehicleSold.getMake(), this.vehicleSold.getModel(), this.vehicleSold.getVehicleType(), this.vehicleSold.getColor(), this.vehicleSold.getMileage(),this.vehicleSold.getPrice(), this.getSALES_TAX(), this.getRECORDING_FEE(), this.getProcessingFee(), this.isFinanced(), this.getTotalPrice(), this.getMonthlyPayment());
+
+        return sale;
     }
 
 }

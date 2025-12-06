@@ -4,11 +4,17 @@ public class Program {
 
     public static void main(String[] args) {
 
-        // Create UI object
-        UserInterface ui = new UserInterface();
+        if(args.length != 2){
+            System.out.println("Need user and pass");
+        }else{
 
-        //Run the app
-        ui.display();
+            // Create UI object
+            UserInterface ui = new UserInterface();
+
+            //Run the app
+            ui.display(args[0], args[1]);
+        }
+
 
     }
 }

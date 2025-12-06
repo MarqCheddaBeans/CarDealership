@@ -9,19 +9,19 @@ public class Vehicle {
     private String model;
     private String vehicleType;
     private String color;
-    private int odometer;
+    private int mileage;
     private double price;
 
 
     //Constructor
-    public Vehicle(String vin, int year, String make, String model, String vehicleType, String color, int odometer, double price) {
+    public Vehicle(String vin, int year, String make, String model, String vehicleType, String color, int mileage, double price) {
         this.vin = vin;
         this.year = year;
         this.make = make;
         this.model = model;
         this.vehicleType = vehicleType;
         this.color = color;
-        this.odometer = odometer;
+        this.mileage = mileage;
         this.price = price;
     }
     //Lotta getters
@@ -49,11 +49,18 @@ public class Vehicle {
         return color;
     }
 
-    public int getOdometer() {
-        return odometer;
+    public int getMileage() {
+        return mileage;
     }
 
     public double getPrice() {
         return price;
+    }
+
+    @Override
+    public String toString(){
+        String formatVehicle = String.format("%-10s| %-5d| %-15s| %-15s| %-10s| %-8s| %-10s| %-10.2f",this.vin,this.year,this.make,this.model,this.vehicleType, this.color, this.mileage, this.price);
+
+        return formatVehicle;
     }
 }
