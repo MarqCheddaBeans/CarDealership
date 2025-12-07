@@ -1,7 +1,8 @@
-package com.pluralsight;
+package com.pluralsight.ui;
 
 import com.pluralsight.dao.ContractDao;
 import com.pluralsight.dao.VehicleDao;
+import com.pluralsight.models.*;
 import org.apache.commons.dbcp2.BasicDataSource;
 
 import java.time.LocalDate;
@@ -11,8 +12,6 @@ import java.util.Scanner;
 
 public class UserInterface {
 
-    //Declare Dealership object named dealer and Static scanner
-    private Dealership dealer;
     public static Scanner scan = new Scanner(System.in);
     //Empty constructor
     public UserInterface(){}
@@ -61,34 +60,34 @@ public class UserInterface {
             switch(choice){
 
                 case 1:
-                    processGetByPriceRequest();
+                    processGetByPriceRequest(bds);
                     break;
                 case 2:
-                    processByMakeModelRequest();
+                    processByMakeModelRequest(bds);
                     break;
                 case 3:
-                    processByYearRequest();
+                    processByYearRequest(bds);
                     break;
                 case 4:
-                    processByColorRequest();
+                    processByColorRequest(bds);
                     break;
                 case 5:
-                    processByMileageRequest();
+                    processByMileageRequest(bds);
                     break;
                 case 6:
-                    processByVehicleTypeRequest();
+                    processByVehicleTypeRequest(bds);
                     break;
                 case 7:
-                    processGetByAllVehiclesRequest();
+                    processGetByAllVehiclesRequest(bds);
                     break;
                 case 8:
-                    processAddVehicleRequest();
+                    processAddVehicleRequest(bds);
                     break;
                 case 9:
-                    processRemoveVehicleRequest();
+                    processRemoveVehicleRequest(bds);
                     break;
                 case 0:
-                    processBuyLeaseVehicleRequest();
+                    processBuyLeaseVehicleRequest(bds);
                     break;
                 case 99:
                     System.out.println("Exiting Application");
@@ -103,7 +102,7 @@ public class UserInterface {
     private BasicDataSource init(String user, String pass){
         BasicDataSource bds = new BasicDataSource();
 
-        bds.setUrl("jdbc:mysql://localhost:3306/dealership");
+        bds.setUrl("jdbc:mysql://localhost:3306/cardealership");
         bds.setUsername(user);
         bds.setPassword(pass);
 
@@ -143,7 +142,7 @@ public class UserInterface {
         String vin = scan.nextLine().trim();
 
         //Create vehicle object set to null for now, will be for the chosen vehicle
-        Vehicle interestedVehicle = dealer.getVehicleByVin(bds, vin);
+        Vehicle interestedVehicle = Dealership.getVehicleByVin(bds, vin);
 
         //check if any vehicle was found
         if(interestedVehicle == null){
@@ -188,14 +187,14 @@ public class UserInterface {
                     System.out.print("Enter your email: ");
                     String email = scan.nextLine();
 
-                    //assign contract to salescontract and add information according
+                    //assign contract as salescontract and add information according
                     buyLease = new SalesContract(date, name, email, interestedVehicle,false);
 
-                    //ADD VEHICLE TO SALES CONTRACT
+                    //call ContractDAO to add sale to our contract database
+                    cDao.addSalesContract((SalesContract) buyLease);
 
-
-                    //Remove vehicle and update inventory
-                    vDao.removeVehicle(interestedVehicle);
+                    //Update vehicle sold status and print confirmation
+                    interestedVehicle.setSold(true);
                     System.out.println("Purchase successful!");
 
                     //check if user financed
@@ -210,12 +209,11 @@ public class UserInterface {
                     //assign contract as salescontract and add relevant information that was collected
                     buyLease = new SalesContract(date, name, email, interestedVehicle,true);
 
-                    //call ContractDataManager to save this contract and print confirmation
-                    cdm.saveContract(buyLease);
+                    //call ContractDAO to add sale to our contract database
+                    cDao.addSalesContract((SalesContract) buyLease);
 
-                    //Remove vehicle and update inventory
-                    dealer.removeVehicle(interestedVehicle);
-                    DealershipFileManager.saveDealership(dealer);
+                    //update vehicle sold status
+                    interestedVehicle.setSold(true);
                     System.out.println("Purchase successful!");
                 }
             }else if(choice.equalsIgnoreCase("L")){
@@ -242,12 +240,11 @@ public class UserInterface {
                     //assign contract as leasecontract and add relevant data
                     buyLease = new LeaseContract(date, name, email, interestedVehicle,false);
 
-                    //call ContractDataManager to save this contract and print confirmation
-                    cdm.saveContract(buyLease);
+                    //call ContractDAO to add lease to our contract database
+                    cDao.addLeaseContract((LeaseContract) buyLease);
 
-                    //Remove vehicle and update inventory
-                    dealer.removeVehicle(interestedVehicle);
-                    DealershipFileManager.saveDealership(dealer);
+                    //Update vehicle sold status and print confirmation
+                    interestedVehicle.setSold(true);
                     System.out.println("Purchase successful!");
 
                     //ask if user financed
@@ -262,12 +259,11 @@ public class UserInterface {
                     //assign contract as leasecontract and add relevant data
                     buyLease = new LeaseContract(date, name, email, interestedVehicle,true);
 
-                    //call ContractDataManager to save this contract and print confirmation
-                    cdm.saveContract(buyLease);
+                    //call ContractDAO to add lease to our contract database
+                    cDao.addLeaseContract((LeaseContract) buyLease);
 
-                    //Remove vehicle and update inventory
-                    dealer.removeVehicle(interestedVehicle);
-                    DealershipFileManager.saveDealership(dealer);
+                    //Update vehicle sold status and print confirmation
+                    interestedVehicle.setSold(true);
                     System.out.println("Purchase successful!");
                 }
             }
@@ -294,7 +290,7 @@ public class UserInterface {
         //create Vehicle object for vehicle to pack up, set as null for now
         Vehicle vehicleToPackUp = null;
 
-        vehicleToPackUp = dealer.getVehicleByVin(bds, vin);
+        vehicleToPackUp = Dealership.getVehicleByVin(bds, vin);
 
         //if no match found
         if(vehicleToPackUp == null){
@@ -332,7 +328,7 @@ public class UserInterface {
         scan.nextLine();
 
         //call method to filter vehicles and display to user
-        List<Vehicle> filteredV = dealer.getVehiclesByPrice(bds, min, max);
+        List<Vehicle> filteredV = Dealership.getVehiclesByPrice(bds, min, max);
         printInventory(filteredV);
     }
 
@@ -346,7 +342,7 @@ public class UserInterface {
         String model = scan.nextLine();
 
         //call method to filter vehicles and display to user
-        List<Vehicle> filteredV = dealer.getVehiclesByMakeModel(bds,make,model);
+        List<Vehicle> filteredV = Dealership.getVehiclesByMakeModel(bds,make,model);
         printInventory(filteredV);
     }
 
@@ -360,7 +356,7 @@ public class UserInterface {
         int max = scan.nextInt();
 
         //call method to filter vehicles and display to user
-        List<Vehicle> filteredV = dealer.getVehiclesByYear(bds,min,max);
+        List<Vehicle> filteredV = Dealership.getVehiclesByYear(bds,min,max);
         printInventory(filteredV);
     }
 
@@ -372,7 +368,7 @@ public class UserInterface {
         String color = scan.nextLine();
 
         //call method to filter vehicles and display to user
-        List<Vehicle> filteredV = dealer.getVehiclesByColor(bds,color);
+        List<Vehicle> filteredV = Dealership.getVehiclesByColor(bds,color);
         printInventory(filteredV);
     }
 
@@ -387,7 +383,7 @@ public class UserInterface {
         scan.nextLine();
 
         //call method to filter vehicles and display to user
-        List<Vehicle> filteredV = dealer.getVehiclesByMileage(bds,min,max);
+        List<Vehicle> filteredV = Dealership.getVehiclesByMileage(bds,min,max);
         printInventory(filteredV);
     }
 
@@ -398,7 +394,7 @@ public class UserInterface {
         String type = scan.nextLine();
 
         //call method to filter vehicles
-        List<Vehicle> filteredV = dealer.getVehiclesByType(bds,type);
+        List<Vehicle> filteredV = Dealership.getVehiclesByType(bds,type);
         printInventory(filteredV);
     }
 
@@ -406,7 +402,7 @@ public class UserInterface {
     public void processGetByAllVehiclesRequest(BasicDataSource bds){
 
         //Store all vehicles in list named inventory and printing to screen
-        List<Vehicle> inventory = dealer.getAllVehicles(bds);
+        List<Vehicle> inventory = Dealership.getAllVehicles(bds);
         printInventory(inventory);
 
     }
@@ -449,22 +445,23 @@ public class UserInterface {
         //Create new vehicle object and store user inputted info
         Vehicle vehicle = new Vehicle(vin,year,make,model,type,color,mileage,price);
 
-        //add vehicle to inventory
-        dealer.addVehicle(bds, vehicle);
+        //add vehicel to database
+        Dealership.addVehicle(bds, vehicle);
 
         System.out.println("Vehicle added successfully");
     }
 
     //Helper method to display vehicles to the screen
     public void printInventory(List<Vehicle> vehicleList) {
-        // Print header
-        System.out.printf("%-25s| %-25s| %-25s%n", dealer.getName(), dealer.getAddress(), dealer.getPhone());
 
         //check if vehicles list is empty, return if empty
         if(vehicleList == null || vehicleList.isEmpty()){
             System.out.println("No vehicles found.");
             return;
         }
+
+        System.out.printf("%-16s | %-4s | %-14s | %-14s | %-9s | %-7s | %-9s | %-7s%n",
+                "VIN", "Year", "Make", "Model", "Type", "Color", "Mileage", "Price");
 
         //cycles through list of vehicles and prints them out
         for (Vehicle v : vehicleList) {

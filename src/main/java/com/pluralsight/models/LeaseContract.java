@@ -1,6 +1,6 @@
-package com.pluralsight;
+package com.pluralsight.models;
 
-public class LeaseContract extends Contract{
+public class LeaseContract extends Contract {
 
     //Create constant for lease annual interest and months because it will not change
     private static final double LEASE_RATE = .04;
@@ -11,8 +11,8 @@ public class LeaseContract extends Contract{
     private boolean financed;
 
     //constructor
-    public LeaseContract(int id,String date, String customerName, String customerEmail, Vehicle vehicleSold, boolean financed) {
-        super(id,date, customerName, customerEmail, vehicleSold);
+    public LeaseContract(String date, String customerName, String customerEmail, Vehicle vehicleSold, boolean financed) {
+        super(date, customerName, customerEmail, vehicleSold);
 
         //Calculate expected ending value and lease fee when contract is created
         double price = vehicleSold.getPrice();

@@ -1,6 +1,6 @@
 package com.pluralsight.dao;
 
-import com.pluralsight.Vehicle;
+import com.pluralsight.models.Vehicle;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -22,7 +22,7 @@ public class VehicleDao {
                 Connection c = this.ds.getConnection();
 
                 PreparedStatement q = c.prepareStatement("""
-                        INSERT INTO vehicles (vin, make, model, year, color, mileage, price, vehicle_type
+                        INSERT INTO vehicles (vin, make, model, year, color, mileage, price, vehicle_type)
                         VALUES(?, ?, ?, ?, ?, ?, ?, ?)
                         """)
                 ){

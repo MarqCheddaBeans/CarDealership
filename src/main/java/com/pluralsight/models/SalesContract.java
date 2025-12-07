@@ -1,6 +1,6 @@
-package com.pluralsight;
+package com.pluralsight.models;
 
-public class SalesContract extends Contract{
+public class SalesContract extends Contract {
 
     //Create properties for SalesContract, 2 constant for sales tax and recording fww
     public static final double SALES_TAX = .05;
@@ -22,7 +22,6 @@ public class SalesContract extends Contract{
     public String getContractType() {
         return contractType;
     }
-
 
     public double getSALES_TAX() {
         //calculate sales tax (5% of vehicle price)
@@ -77,6 +76,7 @@ public class SalesContract extends Contract{
 
         return monthlyPayment;
     }
+
 
     @Override
     public String toString(){

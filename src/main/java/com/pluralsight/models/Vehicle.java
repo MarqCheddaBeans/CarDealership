@@ -1,4 +1,4 @@
-package com.pluralsight;
+package com.pluralsight.models;
 
 public class Vehicle {
 
@@ -11,6 +11,7 @@ public class Vehicle {
     private String color;
     private int mileage;
     private double price;
+    private boolean sold;
 
 
     //Constructor
@@ -23,6 +24,7 @@ public class Vehicle {
         this.color = color;
         this.mileage = mileage;
         this.price = price;
+        this.sold = false;
     }
     //Lotta getters
     public String getVin() {
@@ -55,6 +57,14 @@ public class Vehicle {
 
     public double getPrice() {
         return price;
+    }
+
+    public boolean isSold() {
+        return sold;
+    }
+
+    public void setSold(boolean sold) {
+        this.sold = sold;
     }
 
     @Override
