@@ -44,7 +44,9 @@ public class VehicleDao {
         return rows;
     }
     public int removeVehicle(Vehicle v) {
+
         int rows = 0;
+
         try(
                 Connection c = this.ds.getConnection();
 
